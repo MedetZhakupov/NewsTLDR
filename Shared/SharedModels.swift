@@ -40,5 +40,6 @@ struct Newsletter: Codable, Identifiable {
     let senderEmail: String
     let subject: String
     let bodyText: String
+    let htmlBody: String?
     let receivedDate: Date
 }

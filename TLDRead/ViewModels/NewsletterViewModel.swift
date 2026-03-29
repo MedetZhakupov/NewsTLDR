@@ -5,6 +5,7 @@ import Foundation
 final class NewsletterViewModel {
     private let gmailService = GmailService()
     private let anthropicService = AnthropicService()
+    private let articleExtractor = ArticleExtractorService()
     private let store = SharedDataStore.shared
 
     var tldrs: [TLDRSummary] = []
@@ -57,9 +58,15 @@ final class NewsletterViewModel {
             var newSummaries: [TLDRSummary] = []
 
             for (index, newsletter) in newNewsletters.enumerated() {
+                progress = "Extracting articles \(index + 1) of \(newNewsletters.count)..."
+
+                let articles = await articleExtractor.extractArticles(from: newsletter)
+                let combinedText = articles.map(\.textContent).joined(separator: "\n---\n")
+                let articleContent = combinedText.isEmpty ? nil : String(combinedText.prefix(10000))
+
                 progress = "Summarizing \(index + 1) of \(newNewsletters.count)..."
 
-                let summary = try await anthropicService.generateTLDR(for: newsletter)
+                let summary = try await anthropicService.generateTLDR(for: newsletter, articleContent: articleContent)
                 newSummaries.append(summary)
 
                 // Rate limit

@@ -7,8 +7,9 @@ final class AnthropicService {
 
     private let systemPrompt = """
         You are a newsletter summarizer. Generate a concise TLDR (2-3 sentences) \
-        of the following newsletter email. Focus on the key takeaways and most \
-        important information. Be direct and informative.
+        of the following newsletter. If full article content is provided, use it \
+        for a more comprehensive and accurate summary. Focus on the key takeaways \
+        and most important information. Be direct and informative.
         """
 
     var apiKey: String? {
@@ -19,22 +20,33 @@ final class AnthropicService {
         apiKey != nil
     }
 
-    func generateTLDR(for newsletter: Newsletter) async throws -> TLDRSummary {
+    func generateTLDR(for newsletter: Newsletter, articleContent: String? = nil) async throws -> TLDRSummary {
         guard let apiKey else {
             throw AnthropicError.noAPIKey
         }
 
+        var userMessage = """
+            Newsletter from: \(newsletter.senderName) <\(newsletter.senderEmail)>
+            Subject: \(newsletter.subject)
+
+            Email body:
+            \(newsletter.bodyText)
+            """
+
+        if let articleContent, !articleContent.isEmpty {
+            userMessage += """
+
+                Full article content:
+                \(articleContent)
+                """
+        }
+
         let requestBody = AnthropicRequest(
             model: model,
-            max_tokens: 256,
+            max_tokens: 300,
             system: systemPrompt,
             messages: [
-                .init(role: "user", content: """
-                    Newsletter from: \(newsletter.senderName) <\(newsletter.senderEmail)>
-                    Subject: \(newsletter.subject)
-
-                    \(newsletter.bodyText)
-                    """)
+                .init(role: "user", content: userMessage)
             ]
         )
 

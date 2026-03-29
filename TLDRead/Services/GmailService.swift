@@ -105,13 +105,19 @@ final class GmailService {
         return parseSender(from: fromHeader)
     }
 
+    private struct ExtractedEmailBody {
+        let plainText: String
+        let rawHTML: String?
+    }
+
     private func fetchFullMessage(messageId: String, sender: TrackedSender, token: String) async throws -> Newsletter {
         let url = URL(string: "\(baseURL)/messages/\(messageId)?format=full")!
         let message: MessageResponse = try await fetchJSON(url: url, token: token)
 
         let subject = message.payload?.headers?.first(where: { $0.name == "Subject" })?.value ?? "No Subject"
-        let bodyText = extractBody(from: message.payload)
-        let truncatedBody = String(bodyText.prefix(4000))
+        let body = extractBodies(from: message.payload)
+        let truncatedBody = String(body.plainText.prefix(4000))
+        let truncatedHTML = body.rawHTML.map { String($0.prefix(20000)) }
 
         let internalDate = Double(message.internalDate ?? "0") ?? 0
         let receivedDate = Date(timeIntervalSince1970: internalDate / 1000)
@@ -123,41 +129,41 @@ final class GmailService {
             senderEmail: sender.email,
             subject: subject,
             bodyText: truncatedBody,
+            htmlBody: truncatedHTML,
             receivedDate: receivedDate
         )
     }
 
-    private func extractBody(from payload: MessagePayload?) -> String {
-        guard let payload else { return "" }
+    private func extractBodies(from payload: MessagePayload?) -> ExtractedEmailBody {
+        guard let payload else { return ExtractedEmailBody(plainText: "", rawHTML: nil) }
 
-        // Try text/plain first
-        if payload.mimeType == "text/plain", let data = payload.body?.data {
-            return decodeBase64URL(data)
+        var plainText = ""
+        var rawHTML: String?
+
+        collectBodies(from: payload, plainText: &plainText, rawHTML: &rawHTML)
+
+        // If we only found HTML, derive plain text from it
+        if plainText.isEmpty, let html = rawHTML {
+            plainText = stripHTML(html)
         }
 
-        // Check parts for text/plain then text/html
+        return ExtractedEmailBody(plainText: plainText, rawHTML: rawHTML)
+    }
+
+    private func collectBodies(from payload: MessagePayload, plainText: inout String, rawHTML: inout String?) {
+        if payload.mimeType == "text/plain", let data = payload.body?.data, plainText.isEmpty {
+            plainText = decodeBase64URL(data)
+        }
+
+        if payload.mimeType == "text/html", let data = payload.body?.data, rawHTML == nil {
+            rawHTML = decodeBase64URL(data)
+        }
+
         if let parts = payload.parts {
-            // Prefer text/plain
-            if let plainPart = parts.first(where: { $0.mimeType == "text/plain" }),
-               let data = plainPart.body?.data {
-                return decodeBase64URL(data)
-            }
-
-            // Fall back to text/html with tag stripping
-            if let htmlPart = parts.first(where: { $0.mimeType == "text/html" }),
-               let data = htmlPart.body?.data {
-                let html = decodeBase64URL(data)
-                return stripHTML(html)
-            }
-
-            // Recurse into multipart
             for part in parts {
-                let result = extractBody(from: part)
-                if !result.isEmpty { return result }
+                collectBodies(from: part, plainText: &plainText, rawHTML: &rawHTML)
             }
         }
-
-        return ""
     }
 
     private func decodeBase64URL(_ string: String) -> String {
