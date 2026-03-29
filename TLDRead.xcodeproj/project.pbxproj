@@ -13,6 +13,7 @@
 		A10000000000000000000004 /* GmailService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004; };
 		A10000000000000000000005 /* AnthropicService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005; };
 		A10000000000000000000006 /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006; };
+		A10000000000000000000050 /* ArticleExtractorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000050; };
 		A10000000000000000000007 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007; };
 		A10000000000000000000008 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008; };
 		A10000000000000000000009 /* NewsletterListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009; };
@@ -69,6 +70,7 @@
 		B10000000000000000000004 /* GmailService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailService.swift; sourceTree = "<group>"; };
 		B10000000000000000000005 /* AnthropicService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicService.swift; sourceTree = "<group>"; };
 		B10000000000000000000006 /* SharedDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataStore.swift; sourceTree = "<group>"; };
+		B10000000000000000000050 /* ArticleExtractorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleExtractorService.swift; sourceTree = "<group>"; };
 		B10000000000000000000007 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B10000000000000000000008 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		B10000000000000000000009 /* NewsletterListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsletterListView.swift; sourceTree = "<group>"; };
@@ -152,6 +154,7 @@
 				B10000000000000000000003 /* GoogleAuthService.swift */,
 				B10000000000000000000004 /* GmailService.swift */,
 				B10000000000000000000005 /* AnthropicService.swift */,
+				B10000000000000000000050 /* ArticleExtractorService.swift */,
 				B10000000000000000000006 /* SharedDataStore.swift */,
 			);
 			path = Services;
@@ -332,6 +335,7 @@
 				A10000000000000000000004,
 				A10000000000000000000005,
 				A10000000000000000000006,
+				A10000000000000000000050,
 				A10000000000000000000007,
 				A10000000000000000000008,
 				A10000000000000000000009,

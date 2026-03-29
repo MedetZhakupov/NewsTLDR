@@ -87,7 +87,7 @@ final class ArticleExtractorService {
             return false
         }
 
-        guard let host = url.host?.lowercased() else { return false }
+        guard let host = url.host(percentEncoded: false)?.lowercased() else { return false }
 
         // Block social media and non-article domains
         for blocked in Self.blockedDomains {
