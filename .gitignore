@@ -1,46 +1,35 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Xcode
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+!default.pbxuser
+!default.mode1v3
+!default.mode2v3
+!default.perspectivev3
+xcuserdata/
 
-# database
-*.db
-*.db-wal
-*.db-shm
+# Swift Package Manager
+.build/
+Packages/
+*.resolved
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# CocoaPods
+Pods/
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
+# macOS
 .DS_Store
+*.swp
+*~.nib
+
+# App secrets
+*.xcconfig
+!SharedConfig.xcconfig
+
+# Misc
 *.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
 .env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
