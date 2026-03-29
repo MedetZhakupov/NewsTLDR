@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Replace with your reversed Google Client ID from Google Cloud Console -->
+				<string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+				<string>tldread</string>
+			</array>
+		</dict>
+	</array>
+	<key>GIDClientID</key>
+	<!-- Replace with your Google Client ID from Google Cloud Console -->
+	<string>YOUR_CLIENT_ID.apps.googleusercontent.com</string>
+</dict>
+</plist>
