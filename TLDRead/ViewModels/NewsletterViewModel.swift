@@ -9,15 +9,18 @@ final class NewsletterViewModel {
     private let store = SharedDataStore.shared
 
     var tldrs: [TLDRSummary] = []
+    var hasLoaded = false
     var isLoading = false
     var isGenerating = false
     var errorMessage: String?
     var progress: String?
 
     var hasAPIKey: Bool { anthropicService.hasAPIKey }
+    var lastRefreshDate: Date? { store.loadLastRefreshDate() }
 
     func loadCachedTLDRs() {
         tldrs = store.loadTLDRs()
+        hasLoaded = true
     }
 
     func refreshTLDRs() async {

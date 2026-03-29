@@ -104,6 +104,41 @@ final class AnthropicService {
         return summaries
     }
 
+    // MARK: - Validation
+
+    func validateAPIKey() async throws {
+        guard let apiKey else {
+            throw AnthropicError.noAPIKey
+        }
+
+        let requestBody = AnthropicRequest(
+            model: model,
+            max_tokens: 10,
+            system: "Reply with OK.",
+            messages: [.init(role: "user", content: "ping")]
+        )
+
+        var request = URLRequest(url: URL(string: baseURL)!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+        request.setValue(apiVersion, forHTTPHeaderField: "anthropic-version")
+        request.httpBody = try JSONEncoder().encode(requestBody)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AnthropicError.invalidResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            if let errorResponse = try? JSONDecoder().decode(AnthropicErrorResponse.self, from: data) {
+                throw AnthropicError.apiError(message: errorResponse.error.message)
+            }
+            throw AnthropicError.httpError(statusCode: httpResponse.statusCode)
+        }
+    }
+
     // MARK: - Errors
 
     enum AnthropicError: LocalizedError {

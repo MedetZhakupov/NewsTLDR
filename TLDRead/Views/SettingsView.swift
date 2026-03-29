@@ -8,6 +8,13 @@ struct SettingsView: View {
     @State private var isAPIKeySaved = false
     @State private var refreshInterval: Int = 60
     @State private var showClearConfirmation = false
+    @State private var isTestingKey = false
+    @State private var keyTestResult: KeyTestResult?
+
+    private enum KeyTestResult {
+        case valid
+        case invalid(String)
+    }
 
     private let store = SharedDataStore.shared
 
@@ -36,8 +43,45 @@ struct SettingsView: View {
                         Button("Change") {
                             isAPIKeySaved = false
                             apiKey = ""
+                            keyTestResult = nil
                         }
                         .font(.caption)
+                    }
+
+                    HStack {
+                        Button {
+                            Task {
+                                isTestingKey = true
+                                keyTestResult = nil
+                                do {
+                                    try await AnthropicService().validateAPIKey()
+                                    keyTestResult = .valid
+                                } catch {
+                                    keyTestResult = .invalid(error.localizedDescription)
+                                }
+                                isTestingKey = false
+                            }
+                        } label: {
+                            if isTestingKey {
+                                ProgressView()
+                            } else {
+                                Label("Test API Key", systemImage: "checkmark.shield")
+                            }
+                        }
+                        .disabled(isTestingKey)
+                    }
+
+                    if let keyTestResult {
+                        switch keyTestResult {
+                        case .valid:
+                            Label("API key is valid", systemImage: "checkmark.circle")
+                                .foregroundStyle(.green)
+                                .font(.caption)
+                        case .invalid(let message):
+                            Label(message, systemImage: "xmark.circle")
+                                .foregroundStyle(.red)
+                                .font(.caption)
+                        }
                     }
                 } else {
                     SecureField("sk-ant-...", text: $apiKey)

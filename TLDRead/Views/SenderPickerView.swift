@@ -43,6 +43,10 @@ struct SenderPickerView: View {
                     }
                 }
             }
+
+            if !viewModel.searchText.isEmpty && viewModel.filteredSenders.allSatisfy({ $0.isTracked }) {
+                ContentUnavailableView.search(text: viewModel.searchText)
+            }
         }
         .searchable(text: $viewModel.searchText, prompt: "Search senders")
         .navigationTitle("Newsletter Senders")

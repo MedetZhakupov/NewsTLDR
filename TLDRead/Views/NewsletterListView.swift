@@ -2,6 +2,18 @@ import SwiftUI
 
 struct NewsletterListView: View {
     @Bindable var viewModel: NewsletterViewModel
+    @State private var searchText = ""
+    @State private var tldrToDelete: TLDRSummary?
+    @State private var showDeleteConfirmation = false
+
+    private var filteredTLDRs: [TLDRSummary] {
+        if searchText.isEmpty { return viewModel.tldrs }
+        return viewModel.tldrs.filter {
+            $0.senderName.localizedCaseInsensitiveContains(searchText) ||
+            $0.subject.localizedCaseInsensitiveContains(searchText) ||
+            $0.tldr.localizedCaseInsensitiveContains(searchText)
+        }
+    }
 
     var body: some View {
         List {
@@ -24,7 +36,7 @@ struct NewsletterListView: View {
                 }
             }
 
-            if viewModel.tldrs.isEmpty && !viewModel.isLoading {
+            if viewModel.tldrs.isEmpty && !viewModel.isLoading && viewModel.hasLoaded {
                 Section {
                     ContentUnavailableView(
                         "No Summaries Yet",
@@ -32,21 +44,25 @@ struct NewsletterListView: View {
                         description: Text("Pull to refresh or tap the refresh button to fetch and summarize your newsletters.")
                     )
                 }
+            } else if !searchText.isEmpty && filteredTLDRs.isEmpty {
+                ContentUnavailableView.search(text: searchText)
             }
 
             Section {
-                ForEach(viewModel.tldrs) { tldr in
+                ForEach(filteredTLDRs) { tldr in
                     NavigationLink(value: tldr) {
                         TLDRRowView(tldr: tldr)
                     }
                 }
                 .onDelete { indexSet in
-                    for index in indexSet {
-                        viewModel.deleteTLDR(viewModel.tldrs[index])
+                    if let index = indexSet.first {
+                        tldrToDelete = filteredTLDRs[index]
+                        showDeleteConfirmation = true
                     }
                 }
             }
         }
+        .searchable(text: $searchText, prompt: "Search summaries")
         .navigationTitle("TLDRead")
         .navigationDestination(for: TLDRSummary.self) { tldr in
             NewsletterDetailView(tldr: tldr)
@@ -63,6 +79,23 @@ struct NewsletterListView: View {
         }
         .refreshable {
             await viewModel.refreshTLDRs()
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let date = viewModel.lastRefreshDate {
+                Text("Last refreshed \(date, style: .relative) ago")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(.bar)
+            }
+        }
+        .confirmationDialog("Delete this summary?", isPresented: $showDeleteConfirmation, presenting: tldrToDelete) { tldr in
+            Button("Delete", role: .destructive) {
+                viewModel.deleteTLDR(tldr)
+            }
+        } message: { tldr in
+            Text(tldr.subject)
         }
         .onAppear {
             viewModel.loadCachedTLDRs()

@@ -2,6 +2,11 @@ import SwiftUI
 
 struct NewsletterDetailView: View {
     let tldr: TLDRSummary
+    @State private var showCopied = false
+
+    private var shareText: String {
+        "\(tldr.subject)\n\n\(tldr.tldr)"
+    }
 
     var body: some View {
         ScrollView {
@@ -53,5 +58,28 @@ struct NewsletterDetailView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                ShareLink(item: shareText) {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    UIPasteboard.general.string = shareText
+                    showCopied = true
+                } label: {
+                    Image(systemName: showCopied ? "checkmark" : "doc.on.doc")
+                }
+            }
+        }
+        .onChange(of: showCopied) { _, newValue in
+            if newValue {
+                Task {
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
+                    showCopied = false
+                }
+            }
+        }
     }
 }
